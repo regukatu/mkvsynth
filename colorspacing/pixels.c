@@ -203,11 +203,12 @@ uint16_t getRed (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 	uint16_t rgbRed = 0;
 	float result = 0;
 	float hdeg = 0; //value of hsv or hsl hue in degrees instead of out of 255
-	float hc = 0; //the next three variables are used in hsv to rgb conversions
+	float hc = 0; //the next three variables are used in hsv/hsl to rgb conversions
 	float hx = 0;
 	float hm = 0;
-	float fsat = 0; //hsv saturation and hsv value represented as floats out of 1 instead of ints out of 255
+	float fsat = 0; //hsv/hsl saturation and hsv value represented as floats out of 1 instead of ints out of 255/65535
 	float fval = 0;
+	float flit = 0; //hsl lightness as a float out of 1
 	float tempx = 0; //placeholder for calculating hx
 	int y = 0;
 	
@@ -262,6 +263,7 @@ uint16_t getRed (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if((hdeg < 60) || (hdeg >= 300 && hdeg < 360)){
 				result = hc + hm;
@@ -288,6 +290,7 @@ uint16_t getRed (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if((hdeg < 60) || (hdeg >= 300 && hdeg < 360)){
 				result = hc + hm;
@@ -301,11 +304,65 @@ uint16_t getRed (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			break;
 			
 		case MKVS_HSL24:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv24.h * 360.0 / 256.0;
+			fsat = (float)pixel->hsv24.s / 256.0;
+			flit = (float)pixel->hsv24.v / 256.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if((hdeg < 60) || (hdeg >= 300 && hdeg < 360)){
+				result = hc + hm;
+			}else if(hdeg >= 120 && hdeg < 240){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbRed = (int)result;
 			break;
 		
 		case MKVS_HSL48:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv48.h * 360.0 / 65536.0;
+			fsat = (float)pixel->hsv48.s / 65536.0;
+			flit = (float)pixel->hsv48.v / 65536.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if((hdeg < 60) || (hdeg >= 300 && hdeg < 360)){
+				result = hc + hm;
+			}else if(hdeg >= 120 && hdeg < 240){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbRed = (int)result;
 			break;
 			
 		case NULL_COLOR:
@@ -384,6 +441,7 @@ uint16_t getGreen (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if(hdeg >= 60 && hdeg < 180){
 				result = hc + hm;
@@ -410,6 +468,7 @@ uint16_t getGreen (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if(hdeg >= 60 && hdeg < 180){
 				result = hc + hm;
@@ -423,11 +482,65 @@ uint16_t getGreen (MkvsynthPixel *pixel, MkvsynthMetaData *metaData) {
 			break;
 			
 		case MKVS_HSL24:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv24.h * 360.0 / 256.0;
+			fsat = (float)pixel->hsv24.s / 256.0;
+			flit = (float)pixel->hsv24.v / 256.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if(hdeg >= 60 && hdeg < 180){
+				result = hc + hm;
+			}else if(hdeg >= 240){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbGreen = (int)result;
 			break;
 		
 		case MKVS_HSL48:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv48.h * 360.0 / 65536.0;
+			fsat = (float)pixel->hsv48.s / 65536.0;
+			flit = (float)pixel->hsv48.v / 65536.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if(hdeg >= 60 && hdeg < 180){
+				result = hc + hm;
+			}else if(hdeg >= 240){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbGreen = (int)result;
 			break;
 			
 		case NULL_COLOR:
@@ -505,6 +618,7 @@ uint16_t getBlue (MkvsynthPixel *pixel, MkvsynthMetaData *metaData){
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if(hdeg >= 180 && hdeg < 300){
 				result = hc + hm;
@@ -531,6 +645,7 @@ uint16_t getBlue (MkvsynthPixel *pixel, MkvsynthMetaData *metaData){
 			if(tempx < 0){
 				tempx *= -1.0;
 			}
+			tempx = 1 - tempx;
 			hx = hc * tempx;
 			if(hdeg >= 180 && hdeg < 300){
 				result = hc + hm;
@@ -544,11 +659,65 @@ uint16_t getBlue (MkvsynthPixel *pixel, MkvsynthMetaData *metaData){
 			break;
 			
 		case MKVS_HSL24:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv24.h * 360.0 / 256.0;
+			fsat = (float)pixel->hsv24.s / 256.0;
+			flit = (float)pixel->hsv24.v / 256.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if(hdeg >= 180 && hdeg < 300){
+				result = hc + hm;
+			}else if(hdeg < 120){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbBlue = (int)result;
 			break;
 		
 		case MKVS_HSL48:
-			MkvsynthError("This colorspace interaction is not yet supported");
+			hdeg = (float)pixel->hsv48.h * 360.0 / 65536.0;
+			fsat = (float)pixel->hsv48.s / 65536.0;
+			flit = (float)pixel->hsv48.v / 65536.0;
+			hc = 2 * flit - 1;
+			if(hc < 0){
+				hc *= -1;
+			}
+			hc = (1 - hc) * fsat;
+			hm = flit - hc / 2;
+			tempx = hdeg / 60.0;
+			for(y = 0; tempx > 2.0; y++){
+				tempx -= 2.0;
+			}
+			tempx -= 1;
+			if(tempx < 0){
+				tempx *= -1.0;
+			}
+			tempx = 1 - tempx;
+			hx = hc * tempx;
+			if(hdeg >= 180 && hdeg < 300){
+				result = hc + hm;
+			}else if(hdeg < 120){
+				result = hm;
+			}else{
+				result = hx + hm;
+			}
+			result *= 65535;
+			rgbBlue = (int)result;
 			break;
 			
 		case NULL_COLOR:
